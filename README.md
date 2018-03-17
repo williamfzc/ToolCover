@@ -39,3 +39,9 @@ wxpython与pyqt是比较有名的两大UI库。
 - 用线程或进程（待定）启动run.py，管理它的input与output
 - 将input/output与路由进行绑定
 - 由jinja2渲染成UI
+
+## 后续
+
+- 普通模式与自定义模式
+    - 普通模式将直接接触app的输入输出，按默认方式定义UI
+    - 自定义模式可以使用提供的API自定义UI内容
