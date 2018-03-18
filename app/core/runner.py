@@ -54,3 +54,4 @@ def get_app_process():
     return app_instance
 
 
+sub_app = get_app_process()

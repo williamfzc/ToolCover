@@ -20,8 +20,4 @@ def create_app():
     from app.core import core_blueprint
     app.register_blueprint(core_blueprint)
 
-    # 启动子程序
-    sub_app = get_app_process()
-    globals()['sub_app'] = sub_app
-
     return app
