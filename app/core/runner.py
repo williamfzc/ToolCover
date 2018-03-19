@@ -42,6 +42,10 @@ def get_app_process():
 
     :return: subprocess object
     """
+    # 如果已经构建好了就直接返回，单例模式
+    if hasattr(globals(), 'sub_app'):
+        return globals()['sub_app']
+
     target_app_path = is_runnable()
     entry_path = os.path.join(target_app_path, APP_ENTRY)
     os.chmod(entry_path, 0b111101101)

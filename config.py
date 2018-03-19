@@ -11,7 +11,7 @@ PACKAGE_PATH = os.path.join(APP_ROOT_PATH, 'packages')
 TEMPLATE_PATH = os.path.join(APP_ROOT_PATH, 'templates')
 
 # python目录 根据实际修改
-PYTHON_PATH = os.path.join(PROJECT_PATH, 'venv', 'bin', 'python3.6')
+PYTHON_PATH = os.path.join(PROJECT_PATH, 'venv', 'bin', 'python3')
 
 # 入口
 APP_ENTRY = 'run.py'
