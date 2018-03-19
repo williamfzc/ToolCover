@@ -3,7 +3,6 @@
 """
 import subprocess
 import os
-import sys
 import time
 import fcntl
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
@@ -48,10 +47,6 @@ def get_app_process():
 
     :return: subprocess object
     """
-    # 如果已经构建好了就直接返回，单例模式
-    if hasattr(globals(), 'sub_app'):
-        return globals()['sub_app']
-
     target_app_path = is_runnable()
     entry_path = os.path.join(target_app_path, APP_ENTRY)
     os.chmod(entry_path, 0b111101101)
@@ -66,46 +61,39 @@ def get_app_process():
     return app_instance
 
 
-def read_sub_app():
-    """ 从内嵌app中读数据 """
-    return sub_app.stdout.read()
+class SubApp(object):
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, '_instance'):
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
+    def __init__(self):
+        self.app_instance = get_app_process()
 
-def write_sub_app(content):
-    """ 向内嵌app传递数据 """
-    sub_app.stdin.write(content.encode(DEFAULT_CODE))
-    sub_app.stdin.flush()
+    def read(self):
+        """ 从内嵌app中读数据 """
+        return self.app_instance.stdout.read()
 
+    def write(self, content):
+        """ 向内嵌app传递数据 """
+        self.app_instance.stdin.write(content.encode(DEFAULT_CODE))
+        self.app_instance.stdin.flush()
 
-def stop():
-    """ 停止内层应用 """
-    global sub_app
-    sub_app.kill()
-    del sub_app
+    def stop(self):
+        """ 停止内层应用 """
+        self.app_instance.kill()
+        self.app_instance = None
 
+    def reset(self):
+        """ 重启内层应用 """
+        self.stop()
+        self.__init__()
 
-def restart():
-    """ 重启内层应用 """
-    stop()
-    init_sub_app()
-
-
-def wait_data():
-    """ 阻塞直到内层应用有消息返回 """
-    while sub_app.stdout.isatty():
-        time.sleep(1)
-
-
-def init_sub_app():
-    """ 初始化并启动内层应用 """
-    sub_app = get_app_process()
-    sub_app.read = read_sub_app
-    sub_app.write = write_sub_app
-    sub_app.reset = restart
-    sub_app.wait_data = wait_data
-    sub_app.stop = stop
-    globals()['sub_app'] = sub_app
+    def wait_data(self):
+        """ 阻塞直到内层应用有消息返回 """
+        while self.app_instance.stdout.isatty():
+            time.sleep(1)
 
 
 # 初始化
-init_sub_app()
+sub_app = SubApp()
