@@ -9,4 +9,4 @@ if __name__ == '__main__':
     try:
         app.run()
     except KeyboardInterrupt:
-        sub_app.kill()
+        sub_app.stop()

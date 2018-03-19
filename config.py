@@ -26,3 +26,6 @@ NECESSARY_FILE_LIST = [
     APP_ENTRY,
     APP_DOC
 ]
+
+# 默认文本编码
+DEFAULT_CODE = 'utf-8'

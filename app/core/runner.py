@@ -3,7 +3,10 @@
 """
 import subprocess
 import os
-from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH
+import sys
+import time
+import fcntl
+from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
 
 
 def is_runnable():
@@ -58,20 +61,51 @@ def get_app_process():
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
+    flags = fcntl.fcntl(app_instance.stdout, fcntl.F_GETFL)
+    fcntl.fcntl(app_instance.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
     return app_instance
 
 
 def read_sub_app():
     """ 从内嵌app中读数据 """
-    return '\n'.join([str(line[:-1], encoding='utf-8') for line in sub_app.stdout.readlines()])
+    return sub_app.stdout.read()
 
 
 def write_sub_app(content):
     """ 向内嵌app传递数据 """
-    sub_app.stdin.write(content)
+    sub_app.stdin.write(content.encode(DEFAULT_CODE))
+    sub_app.stdin.flush()
 
 
-# init
-sub_app = get_app_process()
-sub_app.read = read_sub_app
-sub_app.write = write_sub_app
+def stop():
+    """ 停止内层应用 """
+    global sub_app
+    sub_app.kill()
+    del sub_app
+
+
+def restart():
+    """ 重启内层应用 """
+    stop()
+    init_sub_app()
+
+
+def wait_data():
+    """ 阻塞直到内层应用有消息返回 """
+    while sub_app.stdout.isatty():
+        time.sleep(1)
+
+
+def init_sub_app():
+    """ 初始化并启动内层应用 """
+    sub_app = get_app_process()
+    sub_app.read = read_sub_app
+    sub_app.write = write_sub_app
+    sub_app.reset = restart
+    sub_app.wait_data = wait_data
+    sub_app.stop = stop
+    globals()['sub_app'] = sub_app
+
+
+# 初始化
+init_sub_app()

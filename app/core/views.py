@@ -10,11 +10,23 @@ from flask import render_template
 from .form_handler import *
 
 
-@core_blueprint.route('/')
-def index():
+@core_blueprint.route('/start', methods=['GET', 'POST'])
+def start():
+    """ 主路由，所有与子进程的交互都在这里完成 """
     form = load_form()()
 
     if form.validate_on_submit():
         parse_form(form)
+        form = load_form()()
 
-    return render_template('index.html', form=form)
+    return render_template('app.html', form=form)
+
+
+@core_blueprint.route('/')
+def index():
+    # TODO: 将markdown的内容放到这里 并提供程序入口
+    from .runner import sub_app
+    sub_app.reset()
+    return 'Still building...'
+
+

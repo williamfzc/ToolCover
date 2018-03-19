@@ -28,13 +28,13 @@ def _build_form(hints_str):
 def load_form():
     inside_output = sub_app.read()
     form_cls = _build_form(inside_output)
-    print(isinstance(form_cls, FlaskForm))
     return form_cls
 
 
 def parse_form(form_object):
     inside_input = form_object.content.data
     sub_app.write(inside_input)
+    sub_app.wait_data()
 
 
 __all__ = ['load_form', 'parse_form']
