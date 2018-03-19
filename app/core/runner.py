@@ -5,6 +5,7 @@ import subprocess
 import os
 import time
 import fcntl
+import select
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
 
 
@@ -54,7 +55,7 @@ def get_app_process():
         [PYTHON_PATH, os.path.join(target_app_path, APP_ENTRY)],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stderr=subprocess.STDOUT
     )
     flags = fcntl.fcntl(app_instance.stdout, fcntl.F_GETFL)
     fcntl.fcntl(app_instance.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
@@ -72,7 +73,13 @@ class SubApp(object):
 
     def read(self):
         """ 从内嵌app中读数据 """
-        return self.app_instance.stdout.read()
+        result = []
+        while True:
+            line = self.app_instance.stdout.readline()
+            if not line:
+                break
+            result.append(str(line, encoding=DEFAULT_CODE))
+        return '\n'.join(result)
 
     def write(self, content):
         """ 向内嵌app传递数据 """
@@ -91,9 +98,8 @@ class SubApp(object):
 
     def wait_data(self):
         """ 阻塞直到内层应用有消息返回 """
-        while self.app_instance.stdout.isatty():
-            time.sleep(1)
-
+        # TODO: IO不能用，只有第一次能成功
+        pass
 
 # 初始化
 sub_app = SubApp()
