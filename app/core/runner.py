@@ -1,3 +1,6 @@
+"""
+这个模块负责确保inside app的正常运作
+"""
 import subprocess
 import os
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH
@@ -58,4 +61,17 @@ def get_app_process():
     return app_instance
 
 
+def read_sub_app():
+    """ 从内嵌app中读数据 """
+    return '\n'.join([str(line[:-1], encoding='utf-8') for line in sub_app.stdout.readlines()])
+
+
+def write_sub_app(content):
+    """ 向内嵌app传递数据 """
+    sub_app.stdin.write(content)
+
+
+# init
 sub_app = get_app_process()
+sub_app.read = read_sub_app
+sub_app.write = write_sub_app

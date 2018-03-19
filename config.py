@@ -18,17 +18,11 @@ APP_ENTRY = 'run.py'
 # 文档
 APP_DOC = 'README.md'
 
+# SECRET_KEY
+SECRET_KEY = 'guess what'
+
 # 嵌入app内必要的文件
 NECESSARY_FILE_LIST = [
     APP_ENTRY,
     APP_DOC
-]
-
-__all__ = [
-    PROJECT_PATH,
-    APP_ROOT_PATH,
-    CORE_PATH,
-    PACKAGE_PATH,
-    TEMPLATE_PATH,
-    NECESSARY_FILE_LIST
 ]

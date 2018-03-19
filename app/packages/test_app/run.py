@@ -1,4 +1,4 @@
-from app.core.api import need_value
+import sys
 
 
 def test_func(test_input):
@@ -6,9 +6,10 @@ def test_func(test_input):
 
 
 if __name__ == '__main__':
-    print('hello from inside!')
-    print('hello from inside again!!')
-    # TODO: 需要处理input
-    user_input = need_value('need a input to inside')
+    # they are the same:
+    # user_input = input('need a input to inside')
+    print('need a input to inside')
+    user_input = sys.stdin.read()
+
     feedback = test_func(user_input)
-    # sys.stdout.write(feedback)
+    sys.stdout.write(feedback)

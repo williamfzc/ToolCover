@@ -1,25 +1,20 @@
+"""
+路由层
+
+1. 从form_handler得到Form类，实例化后由jinja2+wtforms渲染
+2. 在用户填写完毕之后会得到一个有内容的form实例，将实例传递给form_handler处理
+
+"""
 from ..core import core_blueprint
-from .utils import read_sub_app, write_sub_app, add_tag
 from flask import render_template
+from .form_handler import *
 
 
-# begin of route list
-
-@core_blueprint.route('/', methods=['GET', 'POST'])
+@core_blueprint.route('/')
 def index():
-    # TODO: 处理用户交互的情况，目前只有数据展示
-    # TODO: 当回到主页时需要reset所有状态
-    # 初步想法是用wtforms直接构建表单
-    try:
-        from .utils import InputForm
-        form = InputForm()
-    except ImportError:
-        from .utils import DefaultForm
-        form = DefaultForm()
+    form = load_form()()
 
     if form.validate_on_submit():
-        user_input = form.content.data
-        write_sub_app(user_input)
+        parse_form(form)
 
-    sub_output = add_tag(read_sub_app(), 'p')
-    return render_template('index.html', content=sub_output, form=form)
+    return render_template('index.html', form=form)
