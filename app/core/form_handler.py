@@ -12,6 +12,9 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 
+last_output_from_inside = None
+
+
 def _build_form(hints_str):
     """ 动态构建Form类
 
@@ -28,14 +31,33 @@ def _build_form(hints_str):
 @func_logger
 def load_form(request_content=None):
     """ 根据用户的输入内容向下一层发送请求并等待反馈，再构建新的Form返回给上层 """
+    # 是否结束的标志
+    stop_signal = False
 
-    # 向下层递交请求
-    inside_output = sub_app.request_with(request_content)
-    # 用反馈内容构建新的Form
-    form_cls = _build_form(inside_output)
+    # 如果用户输入为空说明是初始化，不向内层应用写数据，只读数据
+    # 路由层已经保证了所有用户的输入都不为空
+    if request_content:
+        sub_app.write(request_content)
+    inner_output = sub_app.read()
 
-    global InputForm
-    InputForm = form_cls
-    return InputForm
+    # 内层app是否已经执行完了
+    # 两种情况统一处理
+    # 1. 结束了且没有输出
+    # 2. 结束了有输出，需要信息展示
+    if sub_app.is_done():
+        stop_signal = True
+        object_need_handle = inner_output
+    else:
+        global last_output_from_inside
+        # 还没结束但输入为空说明是刷新
+        if inner_output is None:
+            inner_output = last_output_from_inside
+        # 有输入，还没结束，常规场景
+        # 用反馈内容构建新的Form
+        else:
+            # 记录上一次的输出以便特殊情况重新渲染
+            last_output_from_inside = inner_output
+        # 构建Form类
+        object_need_handle = _build_form(inner_output)
 
-
+    return stop_signal, object_need_handle

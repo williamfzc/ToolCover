@@ -4,6 +4,7 @@
 import subprocess
 import os
 import fcntl
+import psutil
 from .utils import singleton, func_logger, logger
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
 
@@ -21,7 +22,6 @@ def is_runnable():
     ]
 
     if target_app_list:
-        # todo: 如果有多个app联动的场景，需要考虑新逻辑
         target_app_path = os.path.join(PACKAGE_PATH, target_app_list[0])
     else:
         raise FileNotFoundError('No app found in {}.'.format(PACKAGE_PATH))
@@ -68,7 +68,7 @@ class SubApp(object):
     """
     def __init__(self):
         self.app_instance = get_app_process()
-        self.last_output = None
+        self.process_item = psutil.Process(self.app_instance.pid)
 
     @func_logger
     def read(self):
@@ -84,32 +84,20 @@ class SubApp(object):
         self.app_instance.stdin.write(bytes(content + os.linesep, DEFAULT_CODE))
         self.app_instance.stdin.flush()
 
-    @func_logger
-    def request_with(self, content):
-        # 如果用户输入为空说明是初始化，不向内层应用写数据，只读数据
-        # 路由层已经保证了所有用户的输入都不为空
-        if content:
-            self.write(content)
-        inner_output = self.read()
-
-        if self.app_instance.poll() is not None:
-            # 说明子进程已经执行完毕了
-            # TODO: 待处理
-            pass
-
-        # 保证用户刷新时UI正常响应
-        if not inner_output:
-            inner_output = self.last_output
-        else:
-            self.last_output = inner_output
-
-        logger.info('user input is: {}'.format(content))
-        logger.info('inner output is: {}'.format(inner_output))
-        return inner_output
+    def is_done(self):
+        """ return if subprocess ended """
+        # make sure poll's return is correct
+        # poll() will delay
+        import time
+        time.sleep(0.1)
+        return False if self.app_instance.poll() is None else True
 
     def stop(self):
         """ 停止内层应用 """
-        self.app_instance.kill()
+        # 还没结束的话要杀掉
+        # TODO: 可能在不同系统下需要不同处理
+        if self.app_instance.poll() is None:
+            self.app_instance.kill()
         self.app_instance = None
 
     def reset(self):

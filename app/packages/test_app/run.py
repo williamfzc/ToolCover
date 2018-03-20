@@ -14,5 +14,5 @@ if __name__ == '__main__':
             f.write(password)
         except BaseException as e:
             f.write(e)
-
-
+        finally:
+            f.write('fucking done')

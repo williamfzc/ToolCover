@@ -1,11 +1,13 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}ToolCover Demo{% endblock %}
+{% block title %} ToolCover Demo {% endblock %}
 
-{% block style %}
-
-<link href="//maxcdn.bootstrapcdn.com/bootswatch/4.0.0/lux/bootstrap.min.css" rel="stylesheet">
-
-{% endblock %}
+<!--TODO: make bootstrap usable-->
+<!--<head>-->
+    <!--{% block css %}-->
+        <!--<link href="https://maxcdn.bootstrapcdn.com/bootswatch/4.0.0/lux/bootstrap.min.css" rel="stylesheet" integrity="sha384-GxhP7S92hzaDyDJqbdpcHqV5cFflxAx0Yze/X7vUONp43KK1E8eUWaJIMkit3D0R" crossorigin="anonymous">-->
+        <!--<link href="https://maxcdn.bootstrapcdn.com/bootswatch/4.0.0/darkly/bootstrap.min.css" rel="stylesheet" integrity="sha384-p8bH4RlA/kdF4wbAoep+/6VeOQI2IAWa9zLjTIQbQLv2FuCjX/W/FkdYdeKISDvK" crossorigin="anonymous">-->
+    <!--{% endblock %}-->
+<!--</head>-->
 
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">
@@ -28,6 +30,7 @@
     </div>
 </div>
 {% endblock %}
+
 {% block content %}
 <div class="container">
     {% block page_content %}{% endblock %}
