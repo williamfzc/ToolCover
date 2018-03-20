@@ -4,7 +4,7 @@
 import subprocess
 import os
 import fcntl
-from .utils import singleton, func_logger
+from .utils import singleton, func_logger, logger
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
 
 
@@ -90,8 +90,8 @@ class SubApp(object):
         if content:
             self.write(content)
         inner_output = self.read()
-        print('user input is: {}'.format(content))
-        print('inner output is: {}'.format(inner_output))
+        logger.info('user input is: {}'.format(content))
+        logger.info('inner output is: {}'.format(inner_output))
         return inner_output
 
     def stop(self):
