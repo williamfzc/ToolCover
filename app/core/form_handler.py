@@ -7,7 +7,6 @@
 """
 from .runner import sub_app
 from .utils import func_logger
-from config import DEFAULT_CODE
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -30,8 +29,6 @@ def _build_form(hints_str):
 def load_form(request_content=None):
     """ 根据用户的输入内容向下一层发送请求并等待反馈，再构建新的Form返回给上层 """
     print(request_content)
-    if request_content:
-        request_content = bytes(request_content, DEFAULT_CODE)
 
     # 向下层递交请求
     inside_output = sub_app.request_with(request_content)

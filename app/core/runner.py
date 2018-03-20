@@ -3,15 +3,9 @@
 """
 import subprocess
 import os
-import time
-import threading
 import fcntl
-import queue
 from .utils import singleton, func_logger
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
-
-
-message_queue =  queue.Queue()
 
 
 def is_runnable():
@@ -68,28 +62,6 @@ def get_app_process():
     return app_instance
 
 
-class Message(object):
-    # TODO: 后续丰富
-    def __init__(self, content):
-        self.content = content
-
-
-class CheckThread(threading.Thread):
-    """ 用于轮询文件句柄是否有新数据 """
-    def __init__(self, file_object):
-        super(CheckThread, self).__init__()
-        self._file = file_object
-
-    def run(self):
-        while True:
-            data = self._file.read()
-            if data:
-                print('have data: {}'.format(data))
-                message_queue.put(Message(content=data))
-            else:
-                time.sleep(1)
-
-
 @singleton
 class SubApp(object):
     """
@@ -97,29 +69,28 @@ class SubApp(object):
     """
     def __init__(self):
         self.app_instance = get_app_process()
-        # self.check_thread = CheckThread(self.app_instance.stdout)
-        # self.check_thread.start()
-
 
     @func_logger
     def read(self):
-        """ 从队列中读内嵌app输出的数据 一次读取一个单位 """
-        # message_object = message_queue.get()
-        # result = message_object.content
-        # return result
-        result, _ = self.app_instance.communicate()
+        """ 读内嵌app输出的数据 """
+        result = self.app_instance.stdout.read()
         return result
 
     @func_logger
     def write(self, content):
         """ 向内嵌app传递数据 """
+        if content is None:
+            content = ''
         self.app_instance.stdin.write(bytes(content + os.linesep, DEFAULT_CODE))
         self.app_instance.stdin.flush()
 
     @func_logger
     def request_with(self, content):
-        result, _ = self.app_instance.communicate(content)
-        return result
+        self.write(content)
+        inner_output = self.read()
+        print('input is: {}'.format(content))
+        print('output is: {}'.format(inner_output))
+        return inner_output
 
     def stop(self):
         """ 停止内层应用 """
