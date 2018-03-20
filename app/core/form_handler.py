@@ -6,7 +6,7 @@
 
 """
 from .runner import sub_app
-
+from .utils import func_logger
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -25,16 +25,17 @@ def _build_form(hints_str):
     return InputForm
 
 
+@func_logger
 def load_form():
     inside_output = sub_app.read()
     form_cls = _build_form(inside_output)
     return form_cls
 
 
+@func_logger
 def parse_form(form_object):
     inside_input = form_object.content.data
     sub_app.write(inside_input)
-    sub_app.wait_data()
 
 
 __all__ = ['load_form', 'parse_form']

@@ -6,23 +6,23 @@
 
 """
 from ..core import core_blueprint
-from flask import render_template
+from flask import render_template, redirect
 from .form_handler import *
 
 
-@core_blueprint.route('/start', methods=['GET', 'POST'])
+@core_blueprint.route('/', methods=['GET', 'POST'])
 def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
     form = load_form()()
 
     if form.validate_on_submit():
         parse_form(form)
-        form = load_form()()
+        return redirect('core_blueprint.start')
 
     return render_template('app.html', form=form)
 
 
-@core_blueprint.route('/')
+@core_blueprint.route('/entry')
 def index():
     # TODO: 将markdown的内容放到这里 并提供程序入口
     from .runner import sub_app

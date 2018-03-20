@@ -4,9 +4,14 @@
 import subprocess
 import os
 import time
+import threading
 import fcntl
-import select
+import queue
+from .utils import singleton, func_logger
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
+
+
+message_queue =  queue.Queue()
 
 
 def is_runnable():
@@ -62,28 +67,49 @@ def get_app_process():
     return app_instance
 
 
-class SubApp(object):
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, '_instance'):
-            cls._instance = super().__new__(cls)
-        return cls._instance
+class Message(object):
+    # TODO: 后续丰富
+    def __init__(self, content):
+        self.content = content
 
+
+class CheckThread(threading.Thread):
+    """ 用于轮询文件句柄是否有新数据 """
+    def __init__(self, file_object):
+        super(CheckThread, self).__init__()
+        self._file = file_object
+
+    def run(self):
+        while True:
+            data = self._file.read()
+            if data:
+                print('have data: {}'.format(data))
+                message_queue.put(Message(content=data))
+            else:
+                time.sleep(1)
+
+
+@singleton
+class SubApp(object):
+    """
+    从内层应用的stdout读数据，向他的stdin写数据
+    """
     def __init__(self):
         self.app_instance = get_app_process()
+        self.check_thread = CheckThread(self.app_instance.stdout)
+        self.check_thread.start()
 
+    @func_logger
     def read(self):
-        """ 从内嵌app中读数据 """
-        result = []
-        while True:
-            line = self.app_instance.stdout.readline()
-            if not line:
-                break
-            result.append(str(line, encoding=DEFAULT_CODE))
-        return '\n'.join(result)
+        """ 从队列中读内嵌app输出的数据 一次读取一个单位 """
+        message_object = message_queue.get()
+        result = message_object.content
+        return result
 
+    @func_logger
     def write(self, content):
         """ 向内嵌app传递数据 """
-        self.app_instance.stdin.write(content.encode(DEFAULT_CODE))
+        self.app_instance.stdin.write(bytes(content + '\n', DEFAULT_CODE))
         self.app_instance.stdin.flush()
 
     def stop(self):
@@ -96,10 +122,6 @@ class SubApp(object):
         self.stop()
         self.__init__()
 
-    def wait_data(self):
-        """ 阻塞直到内层应用有消息返回 """
-        # TODO: IO不能用，只有第一次能成功
-        pass
 
 # 初始化
 sub_app = SubApp()
