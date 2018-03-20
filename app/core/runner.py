@@ -68,6 +68,7 @@ class SubApp(object):
     """
     def __init__(self):
         self.app_instance = get_app_process()
+        self.last_output = None
 
     @func_logger
     def read(self):
@@ -90,6 +91,18 @@ class SubApp(object):
         if content:
             self.write(content)
         inner_output = self.read()
+
+        if self.app_instance.poll() is not None:
+            # 说明子进程已经执行完毕了
+            # TODO: 待处理
+            pass
+
+        # 保证用户刷新时UI正常响应
+        if not inner_output:
+            inner_output = self.last_output
+        else:
+            self.last_output = inner_output
+
         logger.info('user input is: {}'.format(content))
         logger.info('inner output is: {}'.format(inner_output))
         return inner_output

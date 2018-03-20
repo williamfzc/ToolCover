@@ -18,6 +18,9 @@ def create_app():
     bootstrap.init_app(app)
     app.config['SECRET_KEY'] = SECRET_KEY
 
+    # TODO: bootstrap自定义化
+    app.config['BOOTSTRAP_SERVE_LOCAL'] = True
+
     # 配置蓝图
     from app.core import core_blueprint
     app.register_blueprint(core_blueprint)
