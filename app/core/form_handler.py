@@ -28,7 +28,6 @@ def _build_form(hints_str):
 @func_logger
 def load_form(request_content=None):
     """ 根据用户的输入内容向下一层发送请求并等待反馈，再构建新的Form返回给上层 """
-    print(request_content)
 
     # 向下层递交请求
     inside_output = sub_app.request_with(request_content)
@@ -40,6 +39,3 @@ def load_form(request_content=None):
     return InputForm
 
 
-# init
-InputForm = None
-load_form()

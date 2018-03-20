@@ -55,7 +55,6 @@ def get_app_process():
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        shell=True
     )
     flags = fcntl.fcntl(app_instance.stdout, fcntl.F_GETFL)
     fcntl.fcntl(app_instance.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
@@ -86,10 +85,13 @@ class SubApp(object):
 
     @func_logger
     def request_with(self, content):
-        self.write(content)
+        # 如果用户输入为空说明是初始化，不向内层应用写数据，只读数据
+        # 路由层已经保证了所有用户的输入都不为空
+        if content:
+            self.write(content)
         inner_output = self.read()
-        print('input is: {}'.format(content))
-        print('output is: {}'.format(inner_output))
+        print('user input is: {}'.format(content))
+        print('inner output is: {}'.format(inner_output))
         return inner_output
 
     def stop(self):

@@ -13,9 +13,10 @@ from .form_handler import *
 @core_blueprint.route('/', methods=['GET', 'POST'])
 def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
-    form = InputForm()
+    form = load_form()()
 
     if form.validate_on_submit():
+        # 如果用户提交了表单，Form类需要根据返回作相应改变
         user_input = form.content.data
         new_form = load_form(user_input)()
         return render_template('app.html', form=new_form)
