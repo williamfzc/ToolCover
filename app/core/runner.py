@@ -57,10 +57,11 @@ def get_app_process():
     entry_path = os.path.join(target_app_path, APP_ENTRY)
     os.chmod(entry_path, 0b111101101)
     app_instance = subprocess.Popen(
-        [PYTHON_PATH, os.path.join(target_app_path, APP_ENTRY)],
+        [PYTHON_PATH, '-u', os.path.join(target_app_path, APP_ENTRY)],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
+        stderr=subprocess.STDOUT,
+        shell=True
     )
     flags = fcntl.fcntl(app_instance.stdout, fcntl.F_GETFL)
     fcntl.fcntl(app_instance.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
@@ -96,21 +97,29 @@ class SubApp(object):
     """
     def __init__(self):
         self.app_instance = get_app_process()
-        self.check_thread = CheckThread(self.app_instance.stdout)
-        self.check_thread.start()
+        # self.check_thread = CheckThread(self.app_instance.stdout)
+        # self.check_thread.start()
+
 
     @func_logger
     def read(self):
         """ 从队列中读内嵌app输出的数据 一次读取一个单位 """
-        message_object = message_queue.get()
-        result = message_object.content
+        # message_object = message_queue.get()
+        # result = message_object.content
+        # return result
+        result, _ = self.app_instance.communicate()
         return result
 
     @func_logger
     def write(self, content):
         """ 向内嵌app传递数据 """
-        self.app_instance.stdin.write(bytes(content + '\n', DEFAULT_CODE))
+        self.app_instance.stdin.write(bytes(content + os.linesep, DEFAULT_CODE))
         self.app_instance.stdin.flush()
+
+    @func_logger
+    def request_with(self, content):
+        result, _ = self.app_instance.communicate(content)
+        return result
 
     def stop(self):
         """ 停止内层应用 """

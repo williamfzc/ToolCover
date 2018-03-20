@@ -7,6 +7,7 @@
 """
 from .runner import sub_app
 from .utils import func_logger
+from config import DEFAULT_CODE
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -18,24 +19,30 @@ def _build_form(hints_str):
     :param hints_str: 输入框的提示语
     :return: Form类
     """
-    class InputForm(FlaskForm):
+    class Result(FlaskForm):
         content = StringField(hints_str, validators=[DataRequired()])
         submit = SubmitField('Commit')
 
+    return Result
+
+
+@func_logger
+def load_form(request_content=None):
+    """ 根据用户的输入内容向下一层发送请求并等待反馈，再构建新的Form返回给上层 """
+    print(request_content)
+    if request_content:
+        request_content = bytes(request_content, DEFAULT_CODE)
+
+    # 向下层递交请求
+    inside_output = sub_app.request_with(request_content)
+    # 用反馈内容构建新的Form
+    form_cls = _build_form(inside_output)
+
+    global InputForm
+    InputForm = form_cls
     return InputForm
 
 
-@func_logger
-def load_form():
-    inside_output = sub_app.read()
-    form_cls = _build_form(inside_output)
-    return form_cls
-
-
-@func_logger
-def parse_form(form_object):
-    inside_input = form_object.content.data
-    sub_app.write(inside_input)
-
-
-__all__ = ['load_form', 'parse_form']
+# init
+InputForm = None
+load_form()

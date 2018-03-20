@@ -13,11 +13,12 @@ from .form_handler import *
 @core_blueprint.route('/', methods=['GET', 'POST'])
 def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
-    form = load_form()()
+    form = InputForm()
 
     if form.validate_on_submit():
-        parse_form(form)
-        return redirect('core_blueprint.start')
+        user_input = form.content.data
+        new_form = load_form(user_input)()
+        return render_template('app.html', form=new_form)
 
     return render_template('app.html', form=form)
 
@@ -28,5 +29,3 @@ def index():
     from .runner import sub_app
     sub_app.reset()
     return 'Still building...'
-
-
