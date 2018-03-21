@@ -6,7 +6,7 @@ HERE IS A EXAMPLE
 markdown_template = '''
 ## Result report
 
-These result comes from inner app.
+Result comes from inner app.
 
 ### Your Name
 
@@ -26,8 +26,8 @@ if __name__ == '__main__':
     # you can simply use api to build special widget
     test_input = input('multi-list|Select your type|choice1%choice2%choice3')
 
-    user_name = input('Please input your account.')
-    password = input('And what\'s your password?')
+    user_name = input('Please input your account.\n')
+    password = input('And what\'s your password?\n')
 
     # of course, also you can use markdown to show your result
     print(markdown_template.format(

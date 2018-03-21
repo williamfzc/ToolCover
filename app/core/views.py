@@ -13,7 +13,6 @@ from .utils import logger
 from .runner import sub_app
 
 
-
 def handle_form(stop_signal, object_need_handle):
     # 两种情况
     # 1. 如果已经停止，需要重定向到end路由，object_need_handle的类型是string
@@ -49,8 +48,7 @@ def start():
             return result_from_handler
         else:
             # 是个Form对象，则生成实例
-            new_form = result_from_handler()
-            return render_template('app.html', form=new_form, app_name=APP_NAME)
+            form = result_from_handler()
 
     return render_template('app.html', form=form, app_name=APP_NAME)
 
