@@ -9,46 +9,29 @@ from ..core import core_blueprint
 from flask import render_template, redirect, url_for, session
 from .form_handler import *
 from config import APP_NAME
-from .utils import logger
 from .runner import sub_app
-
-
-def handle_form(stop_signal, object_need_handle):
-    # 两种情况
-    # 1. 如果已经停止，需要重定向到end路由，object_need_handle的类型是string
-    # 2. 如果还没停止，object_need_handle的值为FlaskForm
-
-    if stop_signal:
-        session['end_content'] = object_need_handle
-        return 'end', redirect(url_for('.end'))
-    else:
-        return 'form', object_need_handle
 
 
 @core_blueprint.route('/start', methods=['GET', 'POST'])
 def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
-    result_type, result_from_handler = handle_form(*load_form())
-    logger.info((result_type, str(result_from_handler)))
-
-    if result_type == 'end':
-        # 是个Response对象
-        return result_from_handler
+    handler_response = load_form()
+    if handler_response.stop_signal:
+        session['end_content'] = handler_response.data
+        return redirect(url_for('.end'))
     else:
-        # 是个Form对象，则生成实例
-        form = result_from_handler()
+        form = handler_response.data()
 
     # 处理还没停止的情况
     if form.validate_on_submit():
         # 如果用户提交了表单，Form类需要根据返回作相应改变
         user_input = form.content.data
-        result_type, result_from_handler = handle_form(*load_form(user_input))
-        if result_type == 'end':
-            # 是个Response对象
-            return result_from_handler
+        handler_response = load_form(user_input)
+        if handler_response.stop_signal:
+            session['end_content'] = handler_response.data
+            return redirect(url_for('.end'))
         else:
-            # 是个Form对象，则生成实例
-            form = result_from_handler()
+            form = handler_response.data()
 
     return render_template('app.html', form=form, app_name=APP_NAME)
 

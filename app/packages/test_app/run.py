@@ -28,6 +28,7 @@ if __name__ == '__main__':
     # you can add some introduction it in README.md
 
     # you can simply use api to build special widget
+    # TODO: 用同样的方法处理复杂的input
     choice = input('single-list|Select your type|choice1%choice2%choice3')
 
     user_name = input('Please input your account.\n')

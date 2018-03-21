@@ -11,7 +11,7 @@ from markdown import markdown
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 
 last_output_from_inside = None
@@ -19,6 +19,7 @@ TYPE_LIST = {
     'multi-list': SelectMultipleField,
     'single-list': SelectField
 }
+HandlerResponse = namedtuple('HandlerResponse', ('stop_signal', 'data'))
 
 
 def is_special_type(input_str):
@@ -68,8 +69,8 @@ def build_form(hints_str=None):
 
     # 添加next按钮
     cls_dict['next'] = SubmitField('Next')
-    InputForm = type('InputForm', (FlaskForm,), cls_dict)
-    return InputForm
+    return type('InputForm', (FlaskForm,), cls_dict)
+
 
 @func_logger
 def load_form(request_content=None):
@@ -103,7 +104,7 @@ def load_form(request_content=None):
         # 构建Form类
         object_need_handle = build_form(inner_output)
 
-    return stop_signal, object_need_handle
+    return HandlerResponse(stop_signal=stop_signal, data=object_need_handle)
 
 
 def get_description():
