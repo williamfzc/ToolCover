@@ -6,11 +6,12 @@
 
 """
 from ..core import core_blueprint
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, session
 from .form_handler import *
 from config import APP_NAME
 from .utils import logger
 from .runner import sub_app
+
 
 
 def handle_form(stop_signal, object_need_handle):
@@ -19,7 +20,8 @@ def handle_form(stop_signal, object_need_handle):
     # 2. 如果还没停止，object_need_handle的值为FlaskForm
 
     if stop_signal:
-        return 'end', redirect(url_for('.end', content=object_need_handle))
+        session['end_content'] = object_need_handle
+        return 'end', redirect(url_for('.end'))
     else:
         return 'form', object_need_handle
 
@@ -71,8 +73,8 @@ def index():
 
 
 @core_blueprint.route('/end/')
-@core_blueprint.route('/end/<content>')
-def end(content=None):
+def end():
+    content = session['end_content']
     if content:
         content = markdown(content)
     return render_template('end.html', content=content)
