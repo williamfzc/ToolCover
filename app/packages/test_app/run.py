@@ -23,6 +23,9 @@ if __name__ == '__main__':
     # edit your code as usual!
     # you can add some introduction it in README.md
 
+    # you can simply use api to build special widget
+    test_input = input('multi-list|Select your type|choice1%choice2%choice3')
+
     user_name = input('Please input your account.')
     password = input('And what\'s your password?')
 

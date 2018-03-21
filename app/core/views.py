@@ -56,7 +56,7 @@ def start():
 @core_blueprint.route('/', methods=['GET', 'POST'])
 def index():
     sub_app.reset()
-    form = build_form(empty_form=True)()
+    form = build_form()()
 
     # 用户点了开始
     if form.validate_on_submit():

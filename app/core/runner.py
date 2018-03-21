@@ -97,7 +97,7 @@ class SubApp(object):
         """ 向内嵌app传递数据 """
         if content is None:
             content = ''
-        self.app_instance.stdin.write(bytes(content + os.linesep, DEFAULT_CODE))
+        self.app_instance.stdin.write(bytes(str(content) + os.linesep, DEFAULT_CODE))
         self.app_instance.stdin.flush()
 
     def is_done(self):

@@ -9,29 +9,61 @@ from .runner import sub_app, get_readme
 from .utils import func_logger
 from markdown import markdown
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired
+from collections import OrderedDict
 
 
 last_output_from_inside = None
+TYPE_LIST = {
+    'multi-list': SelectMultipleField,
+    'single-list': SelectField
+}
 
 
-def build_form(hints_str=None, empty_form=None):
+def is_special_type(input_str):
+    # seems like:
+    # 'multi-list|description|choice1%choice2%choice3'
+    if '|' not in input_str:
+        return False
+    type_name, *_, = input_str.split('|')
+    if type_name in TYPE_LIST:
+        return True
+    else:
+        return False
+
+
+def parse_special_str(special_str):
+    """ parse special str, and turn it into special widget """
+    # only support single list and multi list now
+    type_name, desc_str, choice_str = special_str.split('|')
+    type_cls = TYPE_LIST[type_name]
+    choice_list = choice_str.split('%')
+    args_list = [(i, i) for i in choice_list]
+    return type_cls(desc_str, choices=args_list, validators=[DataRequired()])
+
+
+def build_form(hints_str=None):
     """ 动态构建Form类
 
     :param hints_str: 输入框的提示语
     :return: Form类
     """
-    if empty_form:
-        class InputForm(FlaskForm):
-            submit = SubmitField('Run')
-    else:
-        class InputForm(FlaskForm):
-            content = StringField(hints_str, validators=[DataRequired()])
-            submit = SubmitField('Commit')
+    # 最后用于type构建类的字典
+    cls_dict = OrderedDict()
 
+    # 是否有特殊控件
+    if hints_str is not None:
+        if is_special_type(hints_str):
+            cls_dict['content'] = parse_special_str(hints_str)
+        # 常规操作
+        else:
+            cls_dict['content'] = StringField(hints_str, validators=[DataRequired()])
+
+    # 添加next按钮
+    cls_dict['next'] = SubmitField('Next')
+    InputForm = type('InputForm', (FlaskForm,), cls_dict)
     return InputForm
-
 
 @func_logger
 def load_form(request_content=None):
