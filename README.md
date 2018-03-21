@@ -1,6 +1,7 @@
 # ToolCover
 
 [![codebeat badge](https://codebeat.co/badges/03386646-bf13-40a4-a8a2-f81cdfef59a2)](https://codebeat.co/projects/github-com-williamfzc-toolcover-master)
+[![Maintainability](https://api.codeclimate.com/v1/badges/24dc28bf1389249b3a19/maintainability)](https://codeclimate.com/github/williamfzc/ToolCover/maintainability)
 
 以网页的形式，旨在用最简单的方式为所有命令行程序提供一个跨平台、美观的交互方案。
 
@@ -48,6 +49,19 @@ wxpython与pyqt是比较有名的两大UI库。
 - 用子进程启动run.py，管理它的input与output
 - 将input/output与路由进行绑定
 - 由bootstrap渲染成UI
+
+## 进程通信方案
+
+考虑了四种方案，最后选用subprocess.Popen管道系列方法来解决通信的问题。
+
+- `subprocess.Popen.communicate()`
+    - 因为需要多次io，而它在第一次调用之后将不能输入第二次
+- `pexpect`
+    - 第三方库，比较好的通信方案，但基于shell在windows上的兼容性不佳
+- `subprocess.run()`
+    - python3.5之后的推荐方法，考虑到需要兼容低版本python3不采用
+- `subprocess.Popen.stdout/stdin/stderr`
+    - 中规中矩的处理方案，以文件形式管理IO
 
 ## 后续
 

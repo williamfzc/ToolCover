@@ -59,10 +59,7 @@ def index():
 
     # 用户点了开始
     if form.validate_on_submit():
-        # TODO: 第一个页面显示有问题
-        return redirect(url_for('.start'))
-        # 后续由prepare解决初始化问题
-        # return redirect(url_for('.prepare'))
+        return redirect(url_for('.prepare'))
 
     return render_template(
         'index.html',
@@ -79,4 +76,5 @@ def end(content=None):
 
 @core_blueprint.route('/prepare')
 def prepare():
-    pass
+    # 放置准备阶段的逻辑
+    return redirect(url_for('.start'))

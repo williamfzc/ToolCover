@@ -54,8 +54,8 @@ def load_form(request_content=None):
         object_need_handle = inner_output
     else:
         global last_output_from_inside
-        # 还没结束但输入为空说明是刷新
-        if request_content is None:
+        # 还没结束但输入为空，也没有返回值，说明是刷新，沿用上次结果
+        if request_content is None and inner_output is None:
             inner_output = last_output_from_inside
         # 有输入，还没结束，常规场景
         # 用反馈内容构建新的Form

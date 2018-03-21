@@ -82,6 +82,10 @@ class SubApp(object):
     @func_logger
     def read(self):
         """ 读内嵌app输出的数据 """
+        # TODO: delay time needs to be more precise
+        # really strange. without this, first page will empty
+        time.sleep(0.1)
+
         result = self.app_instance.stdout.read()
         if result:
             result = result.decode(DEFAULT_CODE).strip()
@@ -99,6 +103,7 @@ class SubApp(object):
         """ return if subprocess ended """
         # make sure poll's return is correct
         # poll() will delay
+        # TODO: delay time needs to be more precise
         time.sleep(0.1)
         return False if self.app_instance.poll() is None else True
 

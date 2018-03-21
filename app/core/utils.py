@@ -7,26 +7,26 @@ import sys
 
 # 单例，获取logger的方法
 def get_logger():
-    if not hasattr(globals(), 'logger'):
-        # 获取logger实例
-        logger = logging.getLogger()
-
-        # 指定logger输出格式
-        formatter = logging.Formatter('%(asctime)s %(levelname)-8s: %(message)s')
-
-        # 控制台日志
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.formatter = formatter
-
-        # 等级
-        logger.setLevel(logging.INFO)
-
-        # 添加handler
-        logger.addHandler(console_handler)
-        globals()['logger'] = logger
-        return logger
-    else:
+    if hasattr(globals(), 'logger'):
         return globals()['logger']
+
+    # 获取logger实例
+    logger = logging.getLogger()
+
+    # 指定logger输出格式
+    formatter = logging.Formatter('%(asctime)s %(levelname)-8s: %(message)s')
+
+    # 控制台日志
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.formatter = formatter
+
+    # 等级
+    logger.setLevel(logging.INFO)
+
+    # 添加handler
+    logger.addHandler(console_handler)
+    globals()['logger'] = logger
+    return logger
 
 
 # 单例装饰器
