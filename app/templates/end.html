@@ -2,10 +2,9 @@
 {% block title %}ToolCover Home{% endblock %}
 {% block page_content %}
 <div class="page-header">
-    <h1>End Page </h1>
+    <h2> Here is your result </h2>
 </div>
 
-{#    TODO: 考虑后续用markdown作为展示#}
-{{ content }}
+{{ content | safe }}
 
 {% endblock %}

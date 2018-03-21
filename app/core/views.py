@@ -8,6 +8,7 @@
 from ..core import core_blueprint
 from flask import render_template, redirect, url_for
 from .form_handler import *
+from config import APP_NAME
 from .utils import logger
 from .runner import sub_app
 
@@ -47,9 +48,9 @@ def start():
         else:
             # 是个Form对象，则生成实例
             new_form = result_from_handler()
-            return render_template('app.html', form=new_form)
+            return render_template('app.html', form=new_form, app_name=APP_NAME)
 
-    return render_template('app.html', form=form)
+    return render_template('app.html', form=form, app_name=APP_NAME)
 
 
 @core_blueprint.route('/', methods=['GET', 'POST'])
@@ -64,13 +65,16 @@ def index():
     return render_template(
         'index.html',
         content=get_description(),
-        form=form
+        form=form,
+        app_name=APP_NAME
     )
 
 
 @core_blueprint.route('/end/')
 @core_blueprint.route('/end/<content>')
 def end(content=None):
+    if content:
+        content = markdown(content)
     return render_template('end.html', content=content)
 
 

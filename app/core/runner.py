@@ -7,7 +7,7 @@ import fcntl
 import psutil
 import time
 from .utils import singleton, func_logger
-from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, PYTHON_PATH, DEFAULT_CODE
+from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_CODE, RUN_ON_SHELL
 
 
 def is_runnable():
@@ -52,10 +52,11 @@ def get_app_process():
     entry_path = os.path.join(target_app_path, APP_ENTRY)
     os.chmod(entry_path, 0b111101101)
     app_instance = subprocess.Popen(
-        [PYTHON_PATH, '-u', os.path.join(target_app_path, APP_ENTRY)],
+        [RUNNER_PATH, os.path.join(target_app_path, APP_ENTRY)],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        shell=RUN_ON_SHELL
     )
     flags = fcntl.fcntl(app_instance.stdout, fcntl.F_GETFL)
     fcntl.fcntl(app_instance.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
