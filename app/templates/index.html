@@ -2,13 +2,14 @@
 {% block title %} ToolCover Home {% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h2> {{ app_name }} </h2>
-</div>
+    {{ super() }}
+    <div class="page-header">
+        <h2> {{ app_name }} </h2>
+    </div>
 
-{{ content | safe }}
+    {{ content | safe }}
 
-{% import "bootstrap/wtf.html" as wtf %}
-{{ wtf.quick_form(form) }}
+    {% import "bootstrap/wtf.html" as wtf %}
+    {{ wtf.quick_form(form) }}
 
 {% endblock %}

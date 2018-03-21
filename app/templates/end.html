@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block title %}ToolCover Home{% endblock %}
 {% block page_content %}
-<div class="page-header">
-    <h2> Here is your result: </h2>
-</div>
+    {{ super() }}
 
-{{ content | safe }}
+    <div class="page-header">
+        <h2> Here is your result: </h2>
+    </div>
+
+    {{ content | safe }}
 
 {% endblock %}
