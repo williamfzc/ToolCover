@@ -8,6 +8,10 @@ markdown_template = '''
 
 Result comes from inner app.
 
+### Your choice
+
+{choice}
+
 ### Your Name
 
 {user_name}
@@ -24,14 +28,14 @@ if __name__ == '__main__':
     # you can add some introduction it in README.md
 
     # you can simply use api to build special widget
-    test_input = input('multi-list|Select your type|choice1%choice2%choice3')
+    choice = input('single-list|Select your type|choice1%choice2%choice3')
 
     user_name = input('Please input your account.\n')
     password = input('And what\'s your password?\n')
 
     # of course, also you can use markdown to show your result
     print(markdown_template.format(
-        user_name=user_name, password=password
+        choice=choice, user_name=user_name, password=password
     ))
     # if not, string is ok
     print('This is what you have done.')

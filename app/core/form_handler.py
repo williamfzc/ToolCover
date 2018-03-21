@@ -58,7 +58,13 @@ def build_form(hints_str=None):
             cls_dict['content'] = parse_special_str(hints_str)
         # 常规操作
         else:
-            cls_dict['content'] = StringField(hints_str, validators=[DataRequired()])
+            cls_dict['content'] = StringField(
+                '', validators=[DataRequired()],
+                render_kw={
+                    "placeholder": hints_str,
+                    "value": ''
+                }
+            )
 
     # 添加next按钮
     cls_dict['next'] = SubmitField('Next')
