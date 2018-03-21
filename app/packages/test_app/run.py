@@ -12,6 +12,7 @@ if __name__ == '__main__':
             f.write(user_input)
             password = input('your password')
             f.write(password)
+            print('ok you have done')
         except BaseException as e:
             f.write(e)
         finally:

@@ -3,3 +3,4 @@ flask_bootstrap==3.3.7.1
 WTForms==2.1
 Flask-WTF==0.14.2
 psutil==5.4.3
+Markdown==2.6.11

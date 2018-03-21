@@ -6,9 +6,10 @@
 
 """
 from ..core import core_blueprint
-from flask import render_template, redirect, url_for, Response
+from flask import render_template, redirect, url_for
 from .form_handler import *
 from .utils import logger
+from .runner import sub_app
 
 
 def handle_form(stop_signal, object_need_handle):
@@ -22,7 +23,7 @@ def handle_form(stop_signal, object_need_handle):
         return 'form', object_need_handle
 
 
-@core_blueprint.route('/', methods=['GET', 'POST'])
+@core_blueprint.route('/start', methods=['GET', 'POST'])
 def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
     result_type, result_from_handler = handle_form(*load_form())
@@ -51,15 +52,31 @@ def start():
     return render_template('app.html', form=form)
 
 
-@core_blueprint.route('/entry')
+@core_blueprint.route('/', methods=['GET', 'POST'])
 def index():
-    # TODO: 将markdown的内容放到这里 并提供程序入口
-    from .runner import sub_app
     sub_app.reset()
-    return 'Still building...'
+    form = build_form(empty_form=True)()
+
+    # 用户点了开始
+    if form.validate_on_submit():
+        # TODO: 第一个页面显示有问题
+        return redirect(url_for('.start'))
+        # 后续由prepare解决初始化问题
+        # return redirect(url_for('.prepare'))
+
+    return render_template(
+        'index.html',
+        content=get_description(),
+        form=form
+    )
 
 
 @core_blueprint.route('/end/')
 @core_blueprint.route('/end/<content>')
 def end(content=None):
     return render_template('end.html', content=content)
+
+
+@core_blueprint.route('/prepare')
+def prepare():
+    pass

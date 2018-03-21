@@ -5,8 +5,9 @@ import subprocess
 import os
 import fcntl
 import psutil
-from .utils import singleton, func_logger, logger
-from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, PYTHON_PATH, DEFAULT_CODE
+import time
+from .utils import singleton, func_logger
+from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, PYTHON_PATH, DEFAULT_CODE
 
 
 def is_runnable():
@@ -61,6 +62,14 @@ def get_app_process():
     return app_instance
 
 
+def get_readme():
+    target_app_path = is_runnable()
+    doc_path = os.path.join(target_app_path, APP_DOC)
+    with open(doc_path) as doc_file:
+        result = doc_file.read()
+    return result
+
+
 @singleton
 class SubApp(object):
     """
@@ -74,6 +83,8 @@ class SubApp(object):
     def read(self):
         """ 读内嵌app输出的数据 """
         result = self.app_instance.stdout.read()
+        if result:
+            result = result.decode(DEFAULT_CODE).strip()
         return result
 
     @func_logger
@@ -88,7 +99,6 @@ class SubApp(object):
         """ return if subprocess ended """
         # make sure poll's return is correct
         # poll() will delay
-        import time
         time.sleep(0.1)
         return False if self.app_instance.poll() is None else True
 

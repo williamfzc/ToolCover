@@ -5,8 +5,9 @@
 2. 将路由得到的form实例解包，把数据传递给inside app
 
 """
-from .runner import sub_app
+from .runner import sub_app, get_readme
 from .utils import func_logger
+from markdown import markdown
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -15,17 +16,21 @@ from wtforms.validators import DataRequired
 last_output_from_inside = None
 
 
-def _build_form(hints_str):
+def build_form(hints_str=None, empty_form=None):
     """ 动态构建Form类
 
     :param hints_str: 输入框的提示语
     :return: Form类
     """
-    class Result(FlaskForm):
-        content = StringField(hints_str, validators=[DataRequired()])
-        submit = SubmitField('Commit')
+    if empty_form:
+        class InputForm(FlaskForm):
+            submit = SubmitField('Run')
+    else:
+        class InputForm(FlaskForm):
+            content = StringField(hints_str, validators=[DataRequired()])
+            submit = SubmitField('Commit')
 
-    return Result
+    return InputForm
 
 
 @func_logger
@@ -50,7 +55,7 @@ def load_form(request_content=None):
     else:
         global last_output_from_inside
         # 还没结束但输入为空说明是刷新
-        if inner_output is None:
+        if request_content is None:
             inner_output = last_output_from_inside
         # 有输入，还没结束，常规场景
         # 用反馈内容构建新的Form
@@ -58,6 +63,11 @@ def load_form(request_content=None):
             # 记录上一次的输出以便特殊情况重新渲染
             last_output_from_inside = inner_output
         # 构建Form类
-        object_need_handle = _build_form(inner_output)
+        object_need_handle = build_form(inner_output)
 
     return stop_signal, object_need_handle
+
+
+def get_description():
+    """ get html from README """
+    return markdown(get_readme())
