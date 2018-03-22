@@ -38,3 +38,7 @@ NECESSARY_FILE_LIST = [
 
 # 默认文本编码
 DEFAULT_CODE = 'utf-8'
+
+# 用户无输入一段时间后会关闭内层app
+# 超时时间
+TIME_OUT = 60

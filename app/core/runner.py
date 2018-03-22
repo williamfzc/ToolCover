@@ -7,7 +7,7 @@ import fcntl
 import psutil
 import time
 from .utils import singleton, func_logger
-from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_CODE, RUN_ON_SHELL
+from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_CODE, RUN_ON_SHELL, TIME_OUT
 
 
 def is_runnable():
@@ -79,6 +79,21 @@ class SubApp(object):
     def __init__(self):
         self.app_instance = get_app_process()
         self.process_item = psutil.Process(self.app_instance.pid)
+        self.last_write_time = None
+
+    def is_expired(self):
+        """ 两次请求之间是否已经超时 """
+        now_time = time.time()
+        if self.last_write_time:
+            time_difference = now_time - self.last_write_time
+            if time_difference > TIME_OUT:
+                return True
+            else:
+                self.last_write_time = now_time
+                return False
+        else:
+            self.last_write_time = now_time
+            return False
 
     @func_logger
     def read(self):
@@ -86,6 +101,10 @@ class SubApp(object):
         # TODO: delay time needs to be more precise
         # really strange. without this, first page will empty
         time.sleep(0.1)
+
+        if self.is_expired():
+            self.stop()
+            return b'timeout'
 
         result = self.app_instance.stdout.read()
         if result:
@@ -106,12 +125,16 @@ class SubApp(object):
         # poll() will delay
         # TODO: delay time needs to be more precise
         time.sleep(0.1)
-        return False if self.app_instance.poll() is None else True
+        if not self.app_instance or self.app_instance.poll():
+            return True
+        else:
+            return False
 
     def stop(self):
         """ 停止内层应用 """
+        if not self.app_instance:
+            return True
         # 还没结束的话要杀掉
-        # TODO: 可能在不同系统下需要不同处理
         if self.app_instance.poll() is None:
             self.app_instance.kill()
         self.app_instance = None

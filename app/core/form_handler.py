@@ -84,11 +84,16 @@ def load_form(request_content=None):
         sub_app.write(request_content)
     inner_output = sub_app.read()
 
+    # 先查看是否超时
+    if b'timeout' == inner_output:
+        stop_signal = True
+        object_need_handle = 'Time out. Please restart.'
+
     # 内层app是否已经执行完了
     # 两种情况统一处理
     # 1. 结束了且没有输出
     # 2. 结束了有输出，需要信息展示
-    if sub_app.is_done():
+    elif sub_app.is_done():
         stop_signal = True
         object_need_handle = inner_output
     else:
