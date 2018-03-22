@@ -7,7 +7,7 @@
 """
 from ..core import core_blueprint
 from flask import render_template, redirect, url_for, session
-from .form_handler import *
+from .handler import *
 from config import APP_NAME
 from .runner import sub_app
 
@@ -21,7 +21,7 @@ def start():
         return redirect(url_for('.end'))
     else:
         form = handler_response.form()
-        desc = handler_response.other_content
+        desc = markdown(handler_response.other_content)
 
     # 处理还没停止的情况
     if form.validate_on_submit():
