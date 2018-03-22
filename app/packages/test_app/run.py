@@ -65,10 +65,9 @@ this is result1.
 
 this is result2.
 
+Tap [this](https://github.com/williamfzc/ToolCover/blob/master/app/packages/test_app/run.py) view the code.
+
 '''
 print(introduction_of_show_result)
-
-# if not, string is ok
-print('And pure string is ok.')
 
 # end of what you need
