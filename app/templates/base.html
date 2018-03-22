@@ -1,20 +1,17 @@
 {% extends "bootstrap/base.html" %}
 
-<!--TODO: make bootstrap usable-->
-{%- block head %}
-    {%- block styles %}
-    <!-- Bootstrap -->
-    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-        <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-        <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
-        <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-        <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-        <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    {%- endblock styles %}
-{%- endblock head %}
+{#TODO: choose a better ui#}
+{#{%- block head %}#}
+{#    {%- block styles %}#}
+{#        {{ super() }}#}
+{#        <link rel="stylesheet" href="static/css/landing-page.css">#}
+{#        <script src="static/js/landing-page.js"></script>#}
+{##}
+{#    {%- endblock styles %}#}
+{#{%- endblock head %}#}
 
 
-{% block title %} ToolCover {% endblock %}
+{% block title %} {{ app_name }} {% endblock %}
 
 {% block navbar %}
 <div class="navbar navbar-inverse" role="navigation">
@@ -27,11 +24,11 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">ToolCover</a>
+            <a class="navbar-brand" href="/"> {{ app_name }} </a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
+                <li><a href="/">Reset</a></li>
             </ul>
         </div>
     </div>
@@ -43,7 +40,7 @@
     {% block page_content %}
         <footer class="footer navbar-fixed-bottom ">
             <div class="container">
-                <small style="color: #888">© Copyright 2018, Feng Zhangchi</small>
+                <p style="color: #888;">© Copyright 2018, <a href="https://github.com/williamfzc/ToolCover">ToolCover</a> by williamfzc </p>
             </div>
         </footer>
     {% endblock %}
