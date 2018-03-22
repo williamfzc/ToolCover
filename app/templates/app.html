@@ -7,7 +7,7 @@
         <h2> {{ app_name }} </h2>
     </div>
 
-    {{ description }}
+    {{ description | safe }}
 
     {% import "bootstrap/wtf.html" as wtf %}
     {{ wtf.quick_form(form) }}

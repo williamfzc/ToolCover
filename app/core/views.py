@@ -33,7 +33,7 @@ def start():
             return redirect(url_for('.end'))
         else:
             form = handler_response.form()
-            desc = handler_response.other_content
+            desc = markdown(handler_response.other_content)
 
     return render_template('app.html', form=form, app_name=APP_NAME, description=desc)
 

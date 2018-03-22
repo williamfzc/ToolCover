@@ -129,6 +129,8 @@ class SubApp(object):
     @func_logger
     def write(self, content):
         """ 向内嵌app传递数据 """
+        if self.is_expired():
+            return False
         if content is None:
             content = ''
         self.app_instance.stdin.write(bytes(str(content) + os.linesep, DEFAULT_TEST_ENCODING))
