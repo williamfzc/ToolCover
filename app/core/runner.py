@@ -116,7 +116,7 @@ class SubApp(object):
         if self.is_done():
             result_list.append(b'end')
 
-        logger.info('DATA from runner\'s read: {}'.format(str(result_list)))
+        logger.log_data('from runner\'s read: {}'.format(str(result_list)))
         return result_list
 
     @func_logger

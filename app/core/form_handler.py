@@ -86,7 +86,7 @@ def load_form(request_content=None):
 
     # 是否为刷新（无输出无输入）
     if not inner_output and request_content is None:
-        logger.info('NOW refresh page')
+        logger.log_status('refresh page')
         inner_output = last_output_from_inside
     else:
         # 记录上一次的输出以便特殊情况重新渲染
@@ -94,7 +94,7 @@ def load_form(request_content=None):
 
     # 先查看是否超时
     if isinstance(inner_output, bytes) and b'timeout' == inner_output:
-        logger.info('NOW timeout')
+        logger.log_status('timeout')
         time_out_msg = 'Time out. Please restart.'
         return HandlerResponse(stop_signal=True, form=None, other_content=time_out_msg)
     else:
@@ -109,10 +109,10 @@ def load_form(request_content=None):
             # 2. 结束了有输出，需要信息展示
             if inner_output[-1] == b'end':
                 end_msg = os.linesep.join(inner_output[:-1])
-                logger.info('NOW normal end with msg: {}'.format(end_msg))
+                logger.log_status('normal end with msg: {}'.format(end_msg))
                 return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
 
-            logger.info('NOW normal continue')
+            logger.log_status('normal continue')
             input_tips = inner_output[-1]
             other_content = ''.join(inner_output[:-1]) if inner_output_length > 1 else ''
 
@@ -121,7 +121,7 @@ def load_form(request_content=None):
             return HandlerResponse(stop_signal=False, form=form_cls, other_content=other_content)
         # 没输出，正常来说不会来到这里
         else:
-            logger.info('NOW no output')
+            logger.log_status('no output')
             end_msg = os.linesep.join(inner_output[:-1])
             return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
 

@@ -47,9 +47,12 @@ def func_logger(func):
     def _logger(*args, **kwargs):
         result = func(*args, **kwargs)
         func_name = func.__name__
-        logger.info('FUNCTION {} DONE'.format(func_name))
+        logger.log_func('{} DONE'.format(func_name))
         return result
     return _logger
 
 
 logger = get_logger()
+logger.log_data = lambda s: logger.info('[DATA] {}'.format(s))
+logger.log_func = lambda s: logger.info('[FUNCTION] {}'.format(s))
+logger.log_status = lambda s: logger.info('[NOW] {}'.format(s))
