@@ -47,7 +47,7 @@ def func_logger(func):
     def _logger(*args, **kwargs):
         result = func(*args, **kwargs)
         func_name = func.__name__
-        logger.info('--- FUNCTION {} DONE ---'.format(func_name))
+        logger.info('FUNCTION {} DONE'.format(func_name))
         return result
     return _logger
 

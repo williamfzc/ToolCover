@@ -17,10 +17,11 @@ def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
     handler_response = load_form()
     if handler_response.stop_signal:
-        session['end_content'] = handler_response.data
+        session['end_content'] = handler_response.other_content
         return redirect(url_for('.end'))
     else:
-        form = handler_response.data()
+        form = handler_response.form()
+        desc = handler_response.other_content
 
     # 处理还没停止的情况
     if form.validate_on_submit():
@@ -28,12 +29,13 @@ def start():
         user_input = form.content.data
         handler_response = load_form(user_input)
         if handler_response.stop_signal:
-            session['end_content'] = handler_response.data
+            session['end_content'] = handler_response.other_content
             return redirect(url_for('.end'))
         else:
-            form = handler_response.data()
+            form = handler_response.form()
+            desc = handler_response.other_content
 
-    return render_template('app.html', form=form, app_name=APP_NAME)
+    return render_template('app.html', form=form, app_name=APP_NAME, description=desc)
 
 
 @core_blueprint.route('/', methods=['GET', 'POST'])

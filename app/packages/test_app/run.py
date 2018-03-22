@@ -28,13 +28,13 @@ if __name__ == '__main__':
     # you can add some introduction it in README.md
 
     # you can simply use api to build special widget
-    # TODO: 用同样的方法处理复杂的input
     choice = input('single-list|Select your type|choice1%choice2%choice3')
 
+    print('Now you need to input something.')
     user_name = input('Please input your account.\n')
     password = input('And what\'s your password?\n')
-
-    # of course, also you can use markdown to show your result
+    #
+    # # of course, also you can use markdown to show your result
     print(markdown_template.format(
         choice=choice, user_name=user_name, password=password
     ))

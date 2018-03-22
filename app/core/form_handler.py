@@ -6,12 +6,13 @@
 
 """
 from .runner import sub_app, get_readme
-from .utils import func_logger
+from .utils import func_logger, logger
 from markdown import markdown
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired
 from collections import OrderedDict, namedtuple
+import os
 
 
 last_output_from_inside = None
@@ -19,7 +20,7 @@ TYPE_LIST = {
     'multi-list': SelectMultipleField,
     'single-list': SelectField
 }
-HandlerResponse = namedtuple('HandlerResponse', ('stop_signal', 'data'))
+HandlerResponse = namedtuple('HandlerResponse', ('stop_signal', 'form', 'other_content'))
 
 
 def is_special_type(input_str):
@@ -75,8 +76,7 @@ def build_form(hints_str=None):
 @func_logger
 def load_form(request_content=None):
     """ 根据用户的输入内容向下一层发送请求并等待反馈，再构建新的Form返回给上层 """
-    # 是否结束的标志
-    stop_signal = False
+    global last_output_from_inside
 
     # 如果用户输入为空说明是初始化，不向内层应用写数据，只读数据
     # 路由层已经保证了所有用户的输入都不为空
@@ -84,32 +84,46 @@ def load_form(request_content=None):
         sub_app.write(request_content)
     inner_output = sub_app.read()
 
-    # 先查看是否超时
-    if b'timeout' == inner_output:
-        stop_signal = True
-        object_need_handle = 'Time out. Please restart.'
-
-    # 内层app是否已经执行完了
-    # 两种情况统一处理
-    # 1. 结束了且没有输出
-    # 2. 结束了有输出，需要信息展示
-    elif sub_app.is_done():
-        stop_signal = True
-        object_need_handle = inner_output
+    # 是否为刷新（无输出无输入）
+    if not inner_output and request_content is None:
+        logger.info('NOW refresh page')
+        inner_output = last_output_from_inside
     else:
-        global last_output_from_inside
-        # 还没结束但输入为空，也没有返回值，说明是刷新，沿用上次结果
-        if request_content is None and inner_output is None:
-            inner_output = last_output_from_inside
-        # 有输入，还没结束，常规场景
-        # 用反馈内容构建新的Form
-        else:
-            # 记录上一次的输出以便特殊情况重新渲染
-            last_output_from_inside = inner_output
-        # 构建Form类
-        object_need_handle = build_form(inner_output)
+        # 记录上一次的输出以便特殊情况重新渲染
+        last_output_from_inside = inner_output
 
-    return HandlerResponse(stop_signal=stop_signal, data=object_need_handle)
+    # 先查看是否超时
+    if isinstance(inner_output, bytes) and b'timeout' == inner_output:
+        logger.info('NOW timeout')
+        time_out_msg = 'Time out. Please restart.'
+        return HandlerResponse(stop_signal=True, form=None, other_content=time_out_msg)
+    else:
+        # 常规内容，string list
+        # 取最后一句作为input框提示
+        # 如果只有一句，那就以那句为提示
+        inner_output_length = len(inner_output)
+        if inner_output_length >= 1:
+            # 再查看是否已经结束
+            # 两种情况统一处理
+            # 1. 结束了且没有输出
+            # 2. 结束了有输出，需要信息展示
+            if inner_output[-1] == b'end':
+                end_msg = os.linesep.join(inner_output[:-1])
+                logger.info('NOW normal end with msg: {}'.format(end_msg))
+                return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
+
+            logger.info('NOW normal continue')
+            input_tips = inner_output[-1]
+            other_content = ''.join(inner_output[:-1]) if inner_output_length > 1 else ''
+
+            # 构建Form类
+            form_cls = build_form(input_tips)
+            return HandlerResponse(stop_signal=False, form=form_cls, other_content=other_content)
+        # 没输出，正常来说不会来到这里
+        else:
+            logger.info('NOW no output')
+            end_msg = os.linesep.join(inner_output[:-1])
+            return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
 
 
 def get_description():

@@ -6,8 +6,8 @@ import os
 import fcntl
 import psutil
 import time
-from .utils import singleton, func_logger
-from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_CODE, RUN_ON_SHELL, TIME_OUT
+from .utils import singleton, func_logger, logger
+from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_TEST_ENCODING, RUN_ON_SHELL, TIME_OUT
 
 
 def is_runnable():
@@ -102,21 +102,29 @@ class SubApp(object):
         # really strange. without this, first page will empty
         time.sleep(0.1)
 
+        # 超时
         if self.is_expired():
             self.stop()
             return b'timeout'
 
-        result = self.app_instance.stdout.read()
-        if result:
-            result = result.decode(DEFAULT_CODE).strip()
-        return result
+        result_list = [
+            each.decode(DEFAULT_TEST_ENCODING).strip()
+            for each in self.app_instance.stdout.readlines()
+        ]
+
+        # 已经结束
+        if self.is_done():
+            result_list.append(b'end')
+
+        logger.info('DATA from runner\'s read: {}'.format(str(result_list)))
+        return result_list
 
     @func_logger
     def write(self, content):
         """ 向内嵌app传递数据 """
         if content is None:
             content = ''
-        self.app_instance.stdin.write(bytes(str(content) + os.linesep, DEFAULT_CODE))
+        self.app_instance.stdin.write(bytes(str(content) + os.linesep, DEFAULT_TEST_ENCODING))
         self.app_instance.stdin.flush()
 
     def is_done(self):
@@ -125,7 +133,8 @@ class SubApp(object):
         # poll() will delay
         # TODO: delay time needs to be more precise
         time.sleep(0.1)
-        if not self.app_instance or self.app_instance.poll():
+        if self.app_instance.poll() is not None:
+            self.stop()
             return True
         else:
             return False
