@@ -5,7 +5,7 @@
 2. 将路由得到的form实例解包，把数据传递给inside app
 
 """
-from .runner import sub_app, get_readme
+from .runner import sub_app, get_readme, RunnerResponse
 from .utils import func_logger, logger
 from markdown import markdown
 from flask_wtf import FlaskForm
@@ -82,48 +82,41 @@ def load_form(request_content=None):
     # 路由层已经保证了所有用户的输入都不为空
     if request_content:
         sub_app.write(request_content)
+    # 返回RunnerResponse对象
     inner_output = sub_app.read()
 
     # 是否为刷新（无输出无输入）
-    if not inner_output and request_content is None:
+    if not inner_output.result and request_content is None:
         logger.log_status('refresh page')
         inner_output = last_output_from_inside
     else:
         # 记录上一次的输出以便特殊情况重新渲染
         last_output_from_inside = inner_output
 
-    # 先查看是否超时
-    if isinstance(inner_output, bytes) and b'timeout' == inner_output:
+    if inner_output.status == 'timeout':
+        # 先查看是否超时
         logger.log_status('timeout')
         time_out_msg = 'Time out. Please restart.'
         return HandlerResponse(stop_signal=True, form=None, other_content=time_out_msg)
+    elif inner_output.status == 'end':
+        # 查看是否已经结束
+        # 两种情况统一处理
+        # 1. 结束了且没有输出
+        # 2. 结束了有输出，需要信息展示
+        end_msg = os.linesep.join(inner_output.result)
+        logger.log_status('normal end with msg: {}'.format(end_msg))
+        return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
     else:
         # 常规内容，string list
         # 取最后一句作为input框提示
         # 如果只有一句，那就以那句为提示
-        inner_output_length = len(inner_output)
-        if inner_output_length >= 1:
-            # 再查看是否已经结束
-            # 两种情况统一处理
-            # 1. 结束了且没有输出
-            # 2. 结束了有输出，需要信息展示
-            if inner_output[-1] == b'end':
-                end_msg = os.linesep.join(inner_output[:-1])
-                logger.log_status('normal end with msg: {}'.format(end_msg))
-                return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
+        logger.log_status('normal continue')
+        input_tips = inner_output.result[-1]
+        other_content = os.linesep.join(inner_output.result[:-1])
 
-            logger.log_status('normal continue')
-            input_tips = inner_output[-1]
-            other_content = ''.join(inner_output[:-1]) if inner_output_length > 1 else ''
-
-            # 构建Form类
-            form_cls = build_form(input_tips)
-            return HandlerResponse(stop_signal=False, form=form_cls, other_content=other_content)
-        # 没输出，正常来说不会来到这里
-        else:
-            logger.log_status('no output')
-            end_msg = os.linesep.join(inner_output[:-1])
-            return HandlerResponse(stop_signal=True, form=None, other_content=end_msg)
+        # 构建Form类
+        form_cls = build_form(input_tips)
+        return HandlerResponse(stop_signal=False, form=form_cls, other_content=other_content)
 
 
 def get_description():

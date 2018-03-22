@@ -8,6 +8,11 @@ import psutil
 import time
 from .utils import singleton, func_logger, logger
 from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_TEST_ENCODING, RUN_ON_SHELL, TIME_OUT
+from collections import namedtuple
+
+
+# 返回给上层的结果类
+RunnerResponse = namedtuple('RunnerResponse', ('status', 'result'))
 
 
 def is_runnable():
@@ -105,19 +110,21 @@ class SubApp(object):
         # 超时
         if self.is_expired():
             self.stop()
-            return b'timeout'
+            return RunnerResponse(status='timeout', result=None)
+        # 已经结束
+        if self.is_done():
+            status = 'end'
+        # 继续
+        else:
+            status = 'normal'
 
         result_list = [
             each.decode(DEFAULT_TEST_ENCODING).strip()
             for each in self.app_instance.stdout.readlines()
         ]
 
-        # 已经结束
-        if self.is_done():
-            result_list.append(b'end')
-
         logger.log_data('from runner\'s read: {}'.format(str(result_list)))
-        return result_list
+        return RunnerResponse(status=status, result=result_list)
 
     @func_logger
     def write(self, content):
@@ -134,7 +141,6 @@ class SubApp(object):
         # TODO: delay time needs to be more precise
         time.sleep(0.1)
         if self.app_instance.poll() is not None:
-            self.stop()
             return True
         else:
             return False
