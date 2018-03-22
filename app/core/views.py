@@ -16,24 +16,24 @@ from .runner import sub_app
 def start():
     """ 主路由，所有与子进程的交互都在这里完成 """
     handler_response = load_form()
+    # 如果进程结束
     if handler_response.stop_signal:
         session['end_content'] = handler_response.other_content
         return redirect(url_for('.end'))
-    else:
-        form = handler_response.form()
-        desc = markdown(handler_response.other_content)
+    form = handler_response.form()
+    desc = markdown(handler_response.other_content)
 
     # 处理还没停止的情况
     if form.validate_on_submit():
         # 如果用户提交了表单，Form类需要根据返回作相应改变
         user_input = form.content.data
         handler_response = load_form(user_input)
+        # 如果进程结束
         if handler_response.stop_signal:
             session['end_content'] = handler_response.other_content
             return redirect(url_for('.end'))
-        else:
-            form = handler_response.form()
-            desc = markdown(handler_response.other_content)
+        form = handler_response.form()
+        desc = markdown(handler_response.other_content)
 
     return render_template('app.html', form=form, app_name=APP_NAME, description=desc)
 
