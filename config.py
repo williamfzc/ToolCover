@@ -22,6 +22,8 @@ RUNNER_PATH = os.path.join(PROJECT_PATH, 'venv', 'bin', 'python3')
 # run on shell or not
 RUN_ON_SHELL = False
 
+# app directory name
+APP_DIR = 'sample_app'
 # app name
 APP_NAME = 'Example in ToolCover'
 # entry of your app

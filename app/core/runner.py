@@ -7,7 +7,7 @@ import fcntl
 import psutil
 import time
 from .utils import singleton, func_logger, logger
-from config import PACKAGE_PATH, NECESSARY_FILE_LIST, APP_ENTRY, APP_DOC, RUNNER_PATH, DEFAULT_TEST_ENCODING, RUN_ON_SHELL, TIME_OUT
+from config import *
 from collections import namedtuple
 
 
@@ -27,10 +27,10 @@ def is_runnable():
         if os.path.isdir(os.path.join(PACKAGE_PATH, each))
     ]
 
-    if target_app_list:
-        target_app_path = os.path.join(PACKAGE_PATH, target_app_list[0])
-    else:
-        raise FileNotFoundError('No app found in {}.'.format(PACKAGE_PATH))
+    # 是否存在目标文件夹
+    if APP_DIR not in target_app_list:
+        raise FileNotFoundError('No target app found in {}.'.format(PACKAGE_PATH))
+    target_app_path = os.path.join(PACKAGE_PATH, APP_DIR)
 
     # 在嵌入的app内查看是否具备必有文件
     # 如run.py和README.md
