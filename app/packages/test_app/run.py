@@ -20,6 +20,8 @@ nothing different with terminal app.
 
 and it will become:
 
+---
+
 '''
 
 print(introduction_of_normal_input)
@@ -31,17 +33,19 @@ introduction_of_special_widget = '''
 
 ## special widget
 
-you can simply build special widget, with a string split with '|':
+you can simply build special widget, with a string split with '|':  
 
 1. type of widget
 2. description
 3. choice list, split with '%'
 
-seems like:
+seems like:  
 
 ```choice = input('single-list|Select your type|choice1%choice2%choice3')```
 
-and it will become:
+and it will become:  
+
+---
 
 '''
 print(introduction_of_special_widget)
@@ -51,7 +55,7 @@ choice = input('single-list|Select your type|choice1%choice2%choice3')
 # of course, also you can use markdown to show your result
 introduction_of_show_result = '''
 
-At the end, of course, also you can use markdown to show your result.
+At the end, of course, also you can use markdown to show your result.  
 
 ## Result report
 
