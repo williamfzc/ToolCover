@@ -2,7 +2,6 @@
 这个模块负责确保inside app的正常运作
 """
 import subprocess
-import os
 import fcntl
 import psutil
 import time
